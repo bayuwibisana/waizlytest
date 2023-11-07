@@ -1,0 +1,54 @@
+1. select * from employees;
+2. select count(*) from employees where job_title='Manager';
+3. select nama, salary from employees where department='Sales';
+4. select AVG(salary) as average_salary from employees where joined_date >= CURDATE() - INTERVAL 5 YEAR;
+5. select nama from employees a left join sales_data b on b.employee_id = a.employee_id order by b.sales desc limit 5
+6. 
+
+SELECT 
+    e.name, 
+    e.salary, 
+    e.department,
+    d.avg_department_salary
+FROM 
+    employees e
+LEFT JOIN (
+    SELECT 
+        department, 
+        AVG(salary) as avg_department_salary
+    FROM 
+        employees
+    GROUP BY 
+        department
+) d ON e.department = d.department
+WHERE 
+    d.avg_department_salary < e.salary;
+
+7.
+SELECT 
+    e.name, 
+    d.sales
+FROM 
+    employees e
+LEFT JOIN (
+   select sum(sales) as 'sales',employee_id as 'empoyee_id'  from sales_data group by employee_id 
+) d ON e.employee_id  = d.empoyee_id
+order by d.sales desc
+
+8.
+
+DELIMITER //
+
+CREATE PROCEDURE GetDepartmentSalaries(IN dept_name VARCHAR(255))
+BEGIN
+    SELECT 
+        e.name, 
+        e.salary,
+        (PERIOD_DIFF(DATE_FORMAT(NOW(), '%Y%m'), DATE_FORMAT(e.joined_date, '%Y%m')) + 1) * e.salary AS total_individual_salary
+    FROM 
+        employees e
+    WHERE 
+        e.department = dept_name;
+END //
+
+DELIMITER ;
